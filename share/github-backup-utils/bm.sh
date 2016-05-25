@@ -47,9 +47,5 @@ bm_end() {
   local tend=$(date +%s)
   local tstart=$(eval "echo \$$(bm_desc_to_varname $@)_start")
 
-  if [ ! -f $BM_FILE_PATH ]; then
-    echo "$(date +%s)" > $BM_FILE_PATH
-  fi
-
   echo "$1 took: $(($tend - $tstart))s" >> $BM_FILE_PATH
 }
