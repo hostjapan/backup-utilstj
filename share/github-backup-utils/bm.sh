@@ -23,5 +23,16 @@ bm_end() {
   local tend=$(date +%s)
   local tstart=$(eval "echo \$$(bm_desc_to_varname $@)_start")
 
-  echo "'$1' took: $(($tend - $tstart))s" >> $GHE_SNAPSHOT_DIR/.benchmark.tmp
+  local tmpbench=
+  if [ -n "$GHE_RESTORE_SNAPSHOT_PATH" ]
+    tmpbench=$GHE_RESTORE_SNAPSHOT_PATH/.benchmark.tmp
+  else
+    tmpbench=$GHE_SNAPSHOT_DIR/.benchmark.tmp
+  fi
+
+  if [ ! -f $tmpbench ]; then
+    echo "$(date +%s)" > $tmpbench
+  fi
+
+  echo "'$1' took: $(($tend - $tstart))s" >> $tmpbench
 }
