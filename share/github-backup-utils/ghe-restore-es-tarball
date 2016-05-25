@@ -12,7 +12,7 @@ set -e
 # Grab the host arg
 GHE_HOSTNAME="$1"
 
-bm_start "$0"
+bm_start "$(basename $0)"
 
 # Show usage and bail with no <host>
 [ -z "$GHE_HOSTNAME" ] && print_usage
@@ -25,4 +25,4 @@ bm_start "$0"
 ghe-ssh "$GHE_HOSTNAME" -- 'ghe-import-es-indices' \
     < "$GHE_DATA_DIR/$GHE_RESTORE_SNAPSHOT/elasticsearch.tar" 1>&3
 
-bm_end "$0"
+bm_end "$(basename $0)"

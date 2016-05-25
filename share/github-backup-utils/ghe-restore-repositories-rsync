@@ -12,7 +12,7 @@ set -e
 # Show usage and bail with no arguments
 [ -z "$*" ] && print_usage
 
-bm_start "$0"
+bm_start "$(basename $0)"
 
 # Grab host arg
 GHE_HOSTNAME="$1"
@@ -43,4 +43,4 @@ ghe-rsync -avH --delete \
     "$GHE_DATA_DIR/$GHE_RESTORE_SNAPSHOT/repositories/" \
     "$(ssh_host_part "$GHE_HOSTNAME"):$GHE_REMOTE_DATA_USER_DIR/repositories" 1>&3
 
-bm_end "$0"
+bm_end "$(basename $0)"

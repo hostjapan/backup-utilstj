@@ -12,7 +12,7 @@ set -e
 # Show usage and bail with no arguments
 [ $# -lt 1 ] && print_usage
 
-bm_start "$0"
+bm_start "$(basename $0)"
 
 GHE_HOSTNAME="$1"
 
@@ -30,4 +30,4 @@ for index in $indices; do
   fi
 done
 
-bm_end "$0"
+bm_end "$(basename $0)"

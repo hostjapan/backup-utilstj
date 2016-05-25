@@ -12,7 +12,7 @@ set -e
 # Show usage and bail with no arguments
 [ -z "$*" ] && print_usage
 
-bm_start "$0"
+bm_start "$(basename $0)"
 
 # Grab host arg
 GHE_HOSTNAME="$1"
@@ -144,4 +144,4 @@ else
   ghe-ssh "$GHE_HOSTNAME" ghe-cluster-each -r git -- rm -f /data/repositories/info/*
 fi
 
-bm_end "$0"
+bm_end "$(basename $0)"

@@ -12,7 +12,7 @@ set -e
 # Show usage and bail with no arguments
 [ -z "$*" ] && print_usage
 
-bm_start "$0"
+bm_start "$(basename $0)"
 
 # Grab host arg
 GHE_HOSTNAME="$1"
@@ -77,4 +77,4 @@ if [ -d "$GHE_DATA_DIR/$GHE_RESTORE_SNAPSHOT/git-hooks" ]; then
   done
 fi
 
-bm_end "$0"
+bm_end "$(basename $0)"
