@@ -19,20 +19,34 @@ bm_start()
   eval "$(bm_desc_to_varname $@)_start=$(date +%s)"
 }
 
+bm_file_path() {
+  if [ -n "$BM_FILE_PATH" ]; then
+    echo $BM_FILE_PATH
+    return
+  fi
+
+  local logfile=benchmark.$(date +%s).log
+  if [ -n "$GHE_RESTORE_SNAPSHOT_PATH" ]; then
+    export BM_FILE_PATH=$GHE_RESTORE_SNAPSHOT_PATH/$logfile
+  else
+    export BM_FILE_PATH=$GHE_SNAPSHOT_DIR/$logfile
+  fi
+
+  echo $BM_FILE_PATH
+}
+
 bm_end() {
+  if [ -z "$BM_FILE_PATH" ]; then
+    echo "Call bm_start first" >&2
+    exit 1
+  fi
+
   local tend=$(date +%s)
   local tstart=$(eval "echo \$$(bm_desc_to_varname $@)_start")
 
-  local tmpbench=
-  if [ -n "$GHE_RESTORE_SNAPSHOT_PATH" ]; then
-    tmpbench=$GHE_RESTORE_SNAPSHOT_PATH/.benchmark.tmp
-  else
-    tmpbench=$GHE_SNAPSHOT_DIR/.benchmark.tmp
+  if [ ! -f $BM_FILE_PATH ]; then
+    echo "$(date +%s)" > $BM_FILE_PATH
   fi
 
-  if [ ! -f $tmpbench ]; then
-    echo "$(date +%s)" > $tmpbench
-  fi
-
-  echo "'$1' took: $(($tend - $tstart))s" >> $tmpbench
+  echo "'$1' took: $(($tend - $tstart))s" >> $BM_FILE_PATH
 }
