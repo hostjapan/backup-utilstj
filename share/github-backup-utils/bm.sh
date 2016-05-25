@@ -29,11 +29,12 @@ bm_file_path() {
 
   local logfile=benchmark.$(date +%s).log
   if [ -n "$GHE_RESTORE_SNAPSHOT_PATH" ]; then
-    export BM_FILE_PATH=$GHE_RESTORE_SNAPSHOT_PATH/$logfile
+    export BM_FILE_PATH=$GHE_RESTORE_SNAPSHOT_PATH/benchmarks/$logfile
   else
-    export BM_FILE_PATH=$GHE_SNAPSHOT_DIR/$logfile
+    export BM_FILE_PATH=$GHE_SNAPSHOT_DIR/benchmarks/$logfile
   fi
 
+  mkdir -p $(dirname $BM_FILE_PATH)
   echo $BM_FILE_PATH
 }
 
@@ -50,5 +51,5 @@ bm_end() {
     echo "$(date +%s)" > $BM_FILE_PATH
   fi
 
-  echo "'$1' took: $(($tend - $tstart))s" >> $BM_FILE_PATH
+  echo "$1 took: $(($tend - $tstart))s" >> $BM_FILE_PATH
 }
