@@ -24,7 +24,7 @@ bm_end() {
   local tstart=$(eval "echo \$$(bm_desc_to_varname $@)_start")
 
   local tmpbench=
-  if [ -n "$GHE_RESTORE_SNAPSHOT_PATH" ]
+  if [ -n "$GHE_RESTORE_SNAPSHOT_PATH" ]; then
     tmpbench=$GHE_RESTORE_SNAPSHOT_PATH/.benchmark.tmp
   else
     tmpbench=$GHE_SNAPSHOT_DIR/.benchmark.tmp
