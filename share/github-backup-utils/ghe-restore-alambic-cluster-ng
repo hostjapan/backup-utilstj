@@ -14,6 +14,8 @@ cd $(dirname "$0")/../..
 # Show usage and bail with no arguments
 [ -z "$*" ] && print_usage
 
+bm_start "$0"
+
 # Grab host arg
 GHE_HOSTNAME="$1"
 
@@ -121,3 +123,5 @@ done
 
 ghe_verbose "* Update storage database after the restore ..."
 cat $to_restore | ghe-ssh "$GHE_HOSTNAME" github-env ./bin/storage-cluster-restore-finalize
+
+bm_end "$0"
