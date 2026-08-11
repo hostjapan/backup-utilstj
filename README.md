@@ -1,226 +1,134 @@
-GitHub Enterprise Backup Utilities
-==================================
+# GitHub Enterprise Server Backup Utilities
 
-This repository includes backup and recovery utilities for [GitHub Enterprise][1].
+> [!IMPORTANT]
+> Did you mean: [Backup Service](https://github.com/github/ghes-backup-utils)?
+>
+> - `backup-utils` is the older backup solution for GHES. It provides a set of tools for a customer to copy data from their GHES appliance to an unrelated machine over SSH. These tools are not run on the appliance, but on the remote machine.
+> - `backup-service` is the newer solution. It is a service that runs on the GHES appliance itself and backs up data to a disk mounted at `/data/backup`.
+>
+> `backup-service` becomes GA in GHES 3.20 and is the preferred solution for backups. `backup-utils` will be deprecated in GHES 3.22.
 
-- **[Features](#features)**
-- **[Requirements](#requirements)**
-  - **[Backup host](#backup-host)**
-  - **[Storage](#storage)**
-  - **[GitHub Enterprise version](#github-enterprise-version)**
-- **[Getting started](#getting-started)**
-- **[Using the backup and restore commands](#using-the-backup-and-restore-commands)**
-- **[Scheduling backups](#scheduling-backups)**
-- **[Backup snapshot file structure](#backup-snapshot-file-structure)**
-- **[Support](#support)**
+This repository includes backup and recovery utilities for
+[GitHub Enterprise Server][1].
 
-### Features
+**Note**: The parallel backup and restore feature will require [GNU awk](https://www.gnu.org/software/gawk) and [moreutils](https://joeyh.name/code/moreutils) to be installed. Note that on some distributions/platforms, the `moreutils-parallel` package is separate from `moreutils` and must be installed on its own.
 
-The backup utilities implement a number of advanced capabilities for backup
+**Note**: the [GitHub Enterprise Server version requirements][2] have
+changed starting with Backup Utilities v2.13.0, released on 27 March 2018.
+
+## Features
+
+Backup Utilities implement a number of advanced capabilities for backup
 hosts, built on top of the backup and restore features already included in
-GitHub Enterprise.
+GitHub Enterprise Server.
 
-These advanced features include:
-
- - Complete GitHub Enterprise backup and recovery system via two simple utilities:<br>
-   `ghe-backup` and `ghe-restore`.
- - Online backups. The GitHub appliance need not be put in maintenance mode for
+- Complete GitHub Enterprise Server backup and recovery system via two simple
+   utilities:<br>`ghe-backup` and `ghe-restore`.
+- Online backups. The GitHub appliance need not be put in maintenance mode for
    the duration of the backup run.
- - Incremental backup of Git repository data. Only changes since the last
+- Incremental backup of Git repository data. Only changes since the last
    snapshot are transferred, leading to faster backup runs and lower network
    bandwidth and machine utilization.
- - Efficient snapshot storage. Only data added since the previous snapshot
+- Efficient snapshot storage. Only data added since the previous snapshot
    consumes new space on the backup host.
- - Multiple backup snapshots with configurable retention periods.
- - Backup commands run under the lowest CPU/IO priority on the GitHub appliance,
+- Multiple backup snapshots with configurable retention periods.
+- Backup commands run under the lowest CPU/IO priority on the GitHub appliance,
    reducing performance impact while backups are in progress.
- - Runs under most Linux/Unix environments.
- - MIT licensed, open source software maintained by GitHub, Inc.
+- Runs under most Linux/Unix environments.
+- MIT licensed, open source software maintained by GitHub, Inc.
 
-### Requirements
+## Documentation
 
-The backup utilities should be run on a host dedicated to long-term permanent
-storage and must have network connectivity with the GitHub Enterprise appliance.
+- **[Requirements](docs/requirements.md)**
+  - **[Backup host requirements](docs/requirements.md#backup-host-requirements)**
+  - **[Storage requirements](docs/requirements.md#storage-requirements)**
+  - **[GitHub Enterprise Server version requirements](docs/requirements.md#github-enterprise-version-requirements)**
+- **[Getting started](docs/getting-started.md)**
+- **[Using the backup and restore commands](docs/usage.md)**
+- **[Scheduling backups](docs/scheduling-backups.md)**
+- **[Backup snapshot file structure](docs/backup-snapshot-file-structure.md)**
+- **[How does Backup Utilities differ from a High Availability replica?](docs/faq.md)**
+- **[Docker](docs/docker.md)**
+- **[Releases](https://github.com/github/enterprise-releases/blob/master/docs/release-backup-utils.md)**
 
-##### Backup host
+## Support
 
-Backup host software requirements are modest: Linux or other modern Unix
-operating system with [rsync][4] v2.6.4 or newer.
+If you have a question related to your specific GitHub Enterprise Server setup, would like assistance with
+backup site setup or recovery, or would like to report a bug or a feature request, please contact our [Enterprise support team][3].
 
-The backup host must be able to establish network connections outbound to the
-GitHub appliance over SSH (port 22).
 
-##### Storage
+## Repository updates - November 2023
 
-Storage requirements vary based on current Git repository disk usage and growth
-patterns of the GitHub appliance. We recommend allocating at least 5x the amount
-of storage allocated to the primary GitHub appliance for historical snapshots
-and growth over time.
+In October 2023 we announced a number of changes to this repository.
+These changes will improve our (GitHub’s) ability to ship enhancements and new features to backup-utils,
+as well as simplify how GitHub Enterprise Server customers interact with backup-utils.
 
-##### GitHub Enterprise version
+Our process for shipping new versions of backup-utils prior to November 2023 involved a 2-way sync between this repository and an internal repository.
+This 2-way sync became significantly more problematic once we started regularly shipping patches in alignment with GitHub Enterprise Server.
 
-For online and incremental backup support, the GitHub Enterprise instance must
-be running version 11.10.342 or above.
+As of 2023-11-30 we have stopped this 2-way sync so that our internal repository becomes the source of truth for the backup-utils source code.
+With the the 2-way sync stopped, this public repository will be used to host documentation about backup-utils and to publish new versions of backup-utils.
+You will be able to access a specific version of backup-utils (which includes the full source code) from the [release page](https://github.com/github/backup-utils/releases) of this repository.
 
-Earlier versions are supported by the backup utilities, but online and
-incremental backups are not supported. We strongly recommend upgrading to the
-latest release if you're running a version prior to 11.10.342. Visit
-https://enterprise.github.com to [download the most recent GitHub Enterprise
-version][5].
+This change has not affected the functionality of the backup-utils tool or a customer’s ability to backup or restore their GitHub Enterprise Server instance.
 
-### Getting started
+### Details
 
- 1. [Download the latest release version][release] and extract *or* clone the
-    repository using Git:
+There are three specific areas that have been affected by us stop the 2-way sync between our internal repository and this public repository on 2023-11-30:
 
-    `git clone -b stable https://github.com/github/backup-utils.git`
+1. **Pull requests**: Customers should no longer open pull requests in this repository.
+These pull requests will not be reviewed or merged.
+This is necessary because we will no longer be syncing changes between this repository and our internal repository.
+2. **Issues**: Customers cannot open issues in this repository.
+Instead, customers will need to follow the standard support process and open a support ticket for any questions/concerns/problems with backup-utils.
+This will ensure all customer requests are handled consistently.
+3. **Installing/upgrading backup-utils**: Customers will not be able to use a clone of the repository to install and upgrade backup-utils.
+Customers will need to download a specific version of backup-utils from the [release page](https://github.com/github/backup-utils/releases)
+(either as a Debian package or as an archive file - see below for details on how to incorporate this change).
 
- 2. Copy the [`backup.config-example`][2] file to `backup.config` and modify as
-    necessary. The `GHE_HOSTNAME` value must be set to the GitHub Enterprise
-    host name. Additional options are available and documented in the
-    configuration file but none are required for basic backup functionality.
+### Timeline
 
- 3. Add the backup host's SSH key to the GitHub appliance as an *Authorized SSH
-    key*. See [Adding an SSH key for shell access][3] for instructions.
+Below is the two phase timeline we will follow to roll out the changes described above:
 
- 4. Run `bin/ghe-host-check` to verify SSH connectivity with the GitHub
-    appliance.
+* **Phase 1 (rolled out on 2023-11-30):** We have closed all open pull requests and issues (after reviewing each one and porting them to our internal repository if merited),
+and updated the repository settings so that new issues cannot be opened. Also, we have stopped syncing code from our internal repository to this repository.
+  * As of 2023-11-30, you can still get a working copy of backup-utils by cloning the repository.
+      But the code will not be updated in the repository; you can access updated versions of backup-utils via the [release page](https://github.com/github/backup-utils/releases).
+* **Phase 2 (rolling out 2024-02-20):** The backup-utils code will be removed and the repository will be used to host documentation for backup-utils.
+After this date, you will no longer be able to clone a working copy of backup-utils from the repository.
+Instead, you will need to download a specific version of backup-utils from the [release page](https://github.com/github/backup-utils/releases).
 
- 5. Run `bin/ghe-backup` to perform an initial full backup.
+### Updating your backup-utils upgrade process
 
-[release]: https://github.com/github/backup-utils/releases
+#### Clone of repository
 
-### Using the backup and restore commands
+If your current process for upgrading backup-utils involves a clone of the repository, you will need to modify your process to download a new version of backup-utils and set it up.
 
-After the initial backup, use the following commands:
+For example, you could download the v3.10.0 (github-backup-utils-v3.10.0.tar.gz) artifact from the [releases page](https://github.com/github/backup-utils/releases/tag/v3.10.0) with:
 
- - The `ghe-backup` command creates incremental snapshots of repository data,
-   along with full snapshots of all other pertinent data stores.
- - The `ghe-restore` command restores snapshots to the same or separate GitHub
-   appliance.
+```shell
+\$ wget https://github.com/github/backup-utils/releases/download/v3.10.0/github-backup-utils-v3.10.0.tar.gz
+```
+And then extract it:
 
-##### Example backup and restore usage
+```shell
+\$ tar xzvf github-backup-utils-v3.10.0.tar.gz
+```
 
-The following assumes that `GHE_HOSTNAME` is set to "github.example.com" in
-`backup.config`.
+This will give you a new folder, `github-backup-utils-v3.10.0`, which contains the code for version 3.10.0 of backup-utils. Once you copy over your backup.config file from a previous installation of backup-utils your new version of backup-utils will be ready to use.
 
-Creating a backup snapshot:
+#### Docker
 
-    $ ghe-backup
-    Starting backup of github.example.com in snapshot 20140727T224148
-    Connect github.example.com OK (v11.10.343)
-    Backing up GitHub settings ...
-    Backing up SSH authorized keys ...
-    Backing up SSH host keys ...
-    Backing up MySQL database ...
-    Backing up Redis database ...
-    Backing up Git repositories ...
-    Backing up GitHub Pages ...
-    Backing up Elasticsearch indices ...
-    Completed backup of github.example.com in snapshot 20140727T224148 at 23:01:58
+For customers that currently use Docker to create a backup-utils image, their existing process may need updating as a result of this change. Previously customers could execute this command to build a Docker image of backup-utils:
 
-Restoring from last successful snapshot to a newly provisioned GitHub Enterprise
-appliance at IP "5.5.5.5":
+```shell
+\$ docker build github.com/github/backup-utils
+```
 
-    $ ghe-restore 5.5.5.5
-    Starting rsync restore of 5.5.5.5 from snapshot 20140727T224148
-    Connect 5.5.5.5 OK (v11.10.343)
-    Enabling maintenance mode on 5.5.5.5 ...
-    Restoring Git repositories ...
-    Restoring GitHub Pages ...
-    Restoring MySQL database ...
-    Restoring Redis database ...
-    Restoring SSH authorized keys ...
-    Restoring Elasticsearch indices ...
-    Restoring SSH host keys ...
-    Completed restore of 5.5.5.5 from snapshot 20140817T174152
-    Visit https://5.5.5.5/setup/settings to configure the recovered appliance.
+This will not work after phase 2 roles out. You will need to update your process to first download an archive from the [release page](https://github.com/github/backup-utils/releases), extract it, and then build the Dockerfile inside the extracted directory.
 
-The `ghe-backup` and `ghe-restore` commands also have a verbose output mode
-(`-v`) that lists files as they're being transferred. It's often useful to
-enable when output is logged to a file.
 
-### Scheduling backups
+[1]: https://github.com/enterprise
+[2]: docs/requirements.md#github-enterprise-version-requirements
+[3]: https://support.github.com/
 
-Regular backups should be scheduled using `cron(8)` or similar command
-scheduling service on the backup host. The backup frequency will dictate the
-worst case recovery point objective (RPO) in your backup plan. We recommend the
-following:
-
- - **Hourly backups** for GitHub Enterprise versions 11.10.342 or greater (due to
-   improved online and incremental backup support)
- - **Daily backups** for versions prior to 11.10.342.
-
-Note: the time required to do full offline backups of large datasets under
-GitHub Enterprise versions prior to 11.10.342 may prohibit the use of daily
-backups. We strongly recommend upgrading to 11.10.342 or greater in that case.
-
-##### Example scheduling usage
-
-The following examples assume the backup utilities are installed under
-`/opt/backup-utils`. The crontab entry should be made under the same user that
-manual backup/recovery commands will be issued under and must have write access
-to the configured `GHE_DATA_DIR` directory.
-
-Note that the `GHE_NUM_SNAPSHOTS` option in `backup.config` should be tuned
-based on the frequency of backups. The ten most recent snapshots are retained by
-default. The number should be adjusted based on backup frequency and available
-storage.
-
-To schedule hourly backup snapshots with verbose informational output written to
-a log file and errors generating an email:
-
-    MAILTO=admin@example.com
-
-    0 * * * * /opt/backup-utils/bin/ghe-backup -v 1>>/opt/backup-utils/backup.log
-
-To schedule nightly backup snapshots instead, use:
-
-    MAILTO=admin@example.com
-
-    0 0 * * * /opt/backup-utils/bin/ghe-backup -v 1>>/opt/backup-utils/backup.log
-
-### Backup snapshot file structure
-
-Backup snapshots are stored in rotating increment directories named after the
-date and time the snapshot was taken. Each snapshot directory contains a full
-backup snapshot of all relevant data stores.
-
-The following example shows a snapshot file hierarchy for hourly frequency.
-There are five snapshot directories, with the `current` symlink pointing to the
-most recent successful snapshot:
-
-    ./data
-       |- 20140724T010000
-       |- 20140725T010000
-       |- 20140726T010000
-       |- 20140727T010000
-       |- 20140728T010000
-          |- pages.tar
-          |- mysql.sql.gz
-          |- redis.rdb
-          |- authorized-keys.json
-          |- ssh-host-keys.tar
-          |- es-indices.tar
-          |- repositories/
-       |- current -> 20140727T010000
-
-Note: the `GHE_DATA_DIR` variable set in `backup.config` can be used to change
-the disk location where snapshots are written.
-
-### Support
-
-If you find a bug or would like to request a feature in backup-utils, please
-open an issue or pull request on this repository. If you have a question related
-to your specific GitHub Enterprise setup or would like assistance with backup
-site setup or recovery, please contact our [Enterprise support team][7] instead.
-
-[1]: https://enterprise.github.com
-[2]: https://github.com/github/enterprise-backup-site/blob/master/backup.config-example
-[3]: https://enterprise.github.com/help/articles/adding-an-ssh-key-for-shell-access
-[4]: http://rsync.samba.org/
-[5]: https://enterprise.github.com/download
-[6]: https://enterprise.github.com/help/articles/upgrading-to-a-newer-release
-[7]: https://enterprise.github.com/support/
-[8]: https://enterprise.github.com/help/articles/backing-up-enterprise-data
-[9]: https://enterprise.github.com/help/articles/restoring-enterprise-data
